@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>万以内数的认识 - 计数器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: #f0f8ff;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* 计数器容器 */
+        .counter-box {
+            display: flex;
+            background: #ffffff;
+            border: 5px solid #2c3e50;
+            border-radius: 15px;
+            padding: 25px 20px;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            margin-bottom: 40px;
+        }
+
+        /* 单个数位 */
+        .digit {
+            width: 85px;
+            height: 450px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            padding: 15px 10px;
+            cursor: pointer;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+
+        /* 进位高亮动画 */
+        .digit.carry {
+            border-color: #e74c3c;
+            animation: carryFlash 0.6s ease;
+        }
+
+        @keyframes carryFlash {
+            0% { border-color: #e74c3c; box-shadow: 0 0 10px rgba(231, 76, 60, 0.4); }
+            50% { border-color: #f39c12; box-shadow: 0 0 20px rgba(243, 156, 18, 0.6); }
+            100% { border-color: #e9ecef; box-shadow: none; }
+        }
+
+        /* 数位名称 */
+        .digit-name {
+            position: absolute;
+            bottom: -40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+            width: 100%;
+            text-align: center;
+            background: #fff;
+            padding: 5px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 算珠样式 */
+        .bead {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(180deg, #4a90e2, #357abd);
+            border-radius: 50%;
+            margin: 5px 0;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            border: 2px solid #2980b9;
+        }
+
+        .bead.active {
+            background: linear-gradient(180deg, #f39c12, #e67e22);
+            transform: scale(1.08);
+            border: 2px solid #d35400;
+        }
+
+        /* 算珠进位动画 */
+        .bead.carry-bead {
+            animation: beadJump 0.5s ease;
+        }
+
+        @keyframes beadJump {
+            0% { transform: scale(1.08) translateY(0); }
+            50% { transform: scale(1.15) translateY(-10px); }
+            100% { transform: scale(1.08) translateY(0); }
+        }
+
+        /* 按钮组容器 */
+        .btn-container {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+
+        /* 功能按钮 */
+        .toggle-btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            background: linear-gradient(180deg, #3498db, #2980b9);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            background: linear-gradient(180deg, #2980b9, #1f618d);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        /* 信息展示区域 */
+        .info-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .info-box {
+            min-width: 220px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 2px solid #e9ecef;
+        }
+
+        .info-item {
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-right: 8px;
+        }
+
+        .info-value {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        /* 重置按钮 */
+        .reset-btn {
+            margin-top: 35px;
+            padding: 14px 40px;
+            font-size: 20px;
+            background: linear-gradient(180deg, #e74c3c, #c0392b);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(180deg, #c0392b, #a93226);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .info-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .digit {
+                width: 70px;
+                height: 400px;
+            }
+            .bead {
+                width: 55px;
+                height: 55px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="title">📚 二年级数学：万以内数的认识</div>
+    <div class="subtitle">点击算珠即可拨动，满十自动进位，点击按钮显示读法、写法、组成</div>
+
+    <!-- 计数器 -->
+    <div class="counter-box" id="counter"></div>
+
+    <!-- 按钮和信息展示区 -->
+    <div class="btn-container">
+        <div class="btn-group">
+            <button class="toggle-btn" id="addOneBtn">➕ 自动加 1</button>
+            <button class="toggle-btn" id="showWrite">显示 写法</button>
+            <button class="toggle-btn" id="showRead">显示 读作</button>
+            <button class="toggle-btn" id="showParts">显示 组成</button>
+        </div>
+
+        <div class="info-container">
+            <div class="info-box hidden" id="writeBox">
+                <div class="info-item">
+                    <span class="info-label">写法：</span>
+                    <span class="info-value" id="writeNum">0</span>
+                </div>
+            </div>
+
+            <div class="info-box hidden" id="readBox">
+                <div class="info-item">
+                    <span class="info-label">读作：</span>
+                    <span class="info-value" id="readNum">零</span>
+                </div>
+            </div>
+
+            <div class="info-box hidden" id="partsBox">
+                <div class="info-item">
+                    <span class="info-label">组成：</span>
+                    <span class="info-value" id="partsNum">由0个千、0个百、0个十、0个一组成</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重置按钮 -->
+    <button class="reset-btn" id="resetBtn">🔄 重置计数器</button>
+
+    <script>
+        // 数位配置：万、千、百、十、个
+        const digits = [
+            { name: "万位", max: 9 },
+            { name: "千位", max: 9 },
+            { name: "百位", max: 9 },
+            { name: "十位", max: 9 },
+            { name: "个位", max: 9 }
+        ];
+
+        const upperNumbers = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+
+        const counter = document.getElementById('counter');
+        const writeNum = document.getElementById('writeNum');
+        const readNum = document.getElementById('readNum');
+        const partsNum = document.getElementById('partsNum');
+        const resetBtn = document.getElementById('resetBtn');
+        const addOneBtn = document.getElementById('addOneBtn');
+
+        const showWriteBtn = document.getElementById('showWrite');
+        const writeBox = document.getElementById('writeBox');
+        const showReadBtn = document.getElementById('showRead');
+        const readBox = document.getElementById('readBox');
+        const showPartsBtn = document.getElementById('showParts');
+        const partsBox = document.getElementById('partsBox');
+
+        // 显示/隐藏
+        showWriteBtn.addEventListener('click', () => {
+            writeBox.classList.toggle('hidden');
+            showWriteBtn.textContent = writeBox.classList.contains('hidden') ? '显示 写法' : '隐藏 写法';
+        });
+        showReadBtn.addEventListener('click', () => {
+            readBox.classList.toggle('hidden');
+            showReadBtn.textContent = readBox.classList.contains('hidden') ? '显示 读作' : '隐藏 读作';
+        });
+        showPartsBtn.addEventListener('click', () => {
+            partsBox.classList.toggle('hidden');
+            showPartsBtn.textContent = partsBox.classList.contains('hidden') ? '显示 组成' : '隐藏 组成';
+        });
+
+        // 初始化
+        function initCounter() {
+            counter.innerHTML = '';
+            digits.forEach((digit, idx) => {
+                const digitEl = document.createElement('div');
+                digitEl.className = 'digit';
+                digitEl.innerHTML = `<div class="digit-name">${digit.name}</div>`;
+                for (let i = 0; i <= digit.max; i++) {
+                    const bead = document.createElement('div');
+                    bead.className = 'bead';
+                    bead.dataset.index = idx;
+                    bead.dataset.value = i;
+                    digitEl.appendChild(bead);
+                }
+                counter.appendChild(digitEl);
+            });
+            updateNumber();
+        }
+
+        // ✅ 核心：修复连续进位（支持 999→1000，9999→10000）
+        function handleCarry(digitIndex) {
+            if (digitIndex <= 0) return;
+
+            const digitEls = document.querySelectorAll('.digit');
+            const current = digitEls[digitIndex];
+            const higher = digitEls[digitIndex - 1];
+
+            // 清空当前位
+            const currentBeads = current.querySelectorAll('.bead');
+            currentBeads.forEach(b => b.classList.remove('active', 'carry-bead'));
+
+            // 进位动画
+            current.classList.add('carry');
+            setTimeout(() => current.classList.remove('carry'), 600);
+
+            // 高位 +1
+            const higherBeads = higher.querySelectorAll('.bead');
+            let activeCount = higher.querySelectorAll('.bead.active').length;
+
+            if (activeCount < 10) {
+                const target = higherBeads[activeCount];
+                target.classList.add('active', 'carry-bead');
+                setTimeout(() => target.classList.remove('carry-bead'), 500);
+                activeCount++;
+
+                // 如果高位也满10，继续递归进位
+                if (activeCount === 10) {
+                    setTimeout(() => handleCarry(digitIndex - 1), 300);
+                }
+            }
+
+            higher.classList.add('carry');
+            setTimeout(() => higher.classList.remove('carry'), 600);
+        }
+
+        // 算珠点击
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('bead')) return;
+            const bead = e.target;
+            const idx = parseInt(bead.dataset.index);
+            const val = parseInt(bead.dataset.value);
+            const beads = bead.parentElement.querySelectorAll('.bead');
+
+            beads.forEach((b, i) => b.classList.toggle('active', i <= val));
+
+            if (val === 9) {
+                setTimeout(() => handleCarry(idx), 200);
+            }
+            updateNumber();
+        });
+
+        // ✅ 新增：自动 +1 按钮（完美连续进位）
+        addOneBtn.addEventListener('click', () => {
+            addOneWithCarry();
+        });
+
+        function addOneWithCarry() {
+            const digitEls = document.querySelectorAll('.digit');
+            let pos = 4; // 从个位开始
+
+            while (pos >= 0) {
+                const d = digitEls[pos];
+                const beads = d.querySelectorAll('.bead');
+                const active = d.querySelectorAll('.bead.active').length;
+
+                if (active < 9) {
+                    beads[active].classList.add('active', 'carry-bead');
+                    setTimeout(() => beads[active].classList.remove('carry-bead'), 300);
+                    break;
+                } else {
+                    // 满9 → 进位
+                    beads.forEach(b => b.classList.remove('active'));
+                    d.classList.add('carry');
+                    setTimeout(() => d.classList.remove('carry'), 500);
+                    pos--;
+                }
+            }
+            updateNumber();
+        }
+
+        // 更新数字显示
+        function updateNumber() {
+            const digitEls = document.querySelectorAll('.digit');
+            const values = Array.from(digitEls).map(el => el.querySelectorAll('.bead.active').length);
+            const num = parseInt(values.join('')) || 0;
+            writeNum.textContent = num;
+            readNum.textContent = getReadText(values);
+            partsNum.textContent = getPartsText(values);
+        }
+
+        // 读法
+        function getReadText(values) {
+            const [wan, qian, bai, shi, ge] = values;
+            if (wan + qian + bai + shi + ge === 0) return '零';
+            const parts = [];
+            if (wan > 0) parts.push(upperNumbers[wan] + '万');
+            if (qian > 0) parts.push(upperNumbers[qian] + '千');
+            else if (wan > 0 && (bai + shi + ge > 0)) parts.push('零');
+            if (bai > 0) parts.push(upperNumbers[bai] + '百');
+            else if ((wan > 0 || qian > 0) && (shi + ge > 0)) parts.push('零');
+            if (shi > 0) parts.push(upperNumbers[shi] + '十');
+            else if ((wan > 0 || qian > 0 || bai > 0) && ge > 0) parts.push('零');
+            if (ge > 0) parts.push(upperNumbers[ge]);
+            return parts.join('').replace(/一十/g, '十');
+        }
+
+        // 组成
+        function getPartsText(values) {
+            const [wan, qian, bai, shi, ge] = values;
+            const parts = [];
+            if (wan > 0) parts.push(wan + '个万');
+            if (qian > 0) parts.push(qian + '个千');
+            if (bai > 0) parts.push(bai + '个百');
+            if (shi > 0) parts.push(shi + '个十');
+            if (ge > 0) parts.push(ge + '个一');
+            return parts.length ? parts.join('、') : '由0个千、0个百、0个十、0个一组成';
+        }
+
+        // 重置
+        resetBtn.addEventListener('click', () => {
+            document.querySelectorAll('.bead').forEach(b => b.classList.remove('active', 'carry-bead'));
+            document.querySelectorAll('.digit').forEach(d => d.classList.remove('carry'));
+            updateNumber();
+        });
+
+        initCounter();
+    </script>
+</body>
+</html>
